@@ -52,16 +52,14 @@ class Game:
         bird_y = self.bird_pos[1]
 
         if self.bird_lift:
-            # Lintua nostetaan (8 px / frame)
-            self.bird_y_speed -= 1
+            # Lintua nostetaan (0.5 px nostovauhtia / frame)
+            self.bird_y_speed -= 0.5
         else:
             # Painovoima (lisää putoamisnopeutta joka kuvassa)
             self.bird_y_speed += 0.2
 
-
         # Liikuta lintua sen nopeuden verran
         bird_y += self.bird_y_speed
-
 
         self.bird_pos = (self.bird_pos[0], bird_y)
 
@@ -70,7 +68,9 @@ class Game:
         self.screen.fill((230, 230, 255))
 
         # Piirrä lintu
-        self.screen.blit(self.img_bird1, self.bird_pos)
+        angle = -90 * 0.08 * self.bird_y_speed
+        bird_img = pygame.transform.rotozoom(self.img_bird1, angle, 1)
+        self.screen.blit(bird_img, self.bird_pos)
 
         pygame.display.flip()
 
