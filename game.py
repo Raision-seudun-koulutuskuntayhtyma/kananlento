@@ -14,7 +14,9 @@ class Game:
 
     def run(self):
         clock = pygame.time.Clock()
+
         self.running = True
+
         while self.running:
             self.handle_events()
             self.handle_game_logic()
