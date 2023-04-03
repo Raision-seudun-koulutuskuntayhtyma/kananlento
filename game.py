@@ -32,14 +32,13 @@ class Game:
             pygame.transform.rotozoom(x, 0, 600 / x.get_height()).convert_alpha()
             for x in original_bg_images
         ]
+        self.bg_widths = [x.get_width() for x in self.bg_imgs]
 
     def init_objects(self):
         self.bird_y_speed = 0
         self.bird_pos = (200, 000)
         self.bird_lift = False
-        self.bg0_pos = 0
-        self.bg1_pos = 0
-        self.bg2_pos = 0
+        self.bg_pos = [0, 0, 0]
 
     def run(self):
         clock = pygame.time.Clock()
@@ -67,9 +66,9 @@ class Game:
                     self.bird_lift = False
 
     def handle_game_logic(self):
-        self.bg0_pos -= 0.25
-        self.bg1_pos -= 0.5
-        self.bg2_pos -= 2
+        self.bg_pos[0] -= 0.5
+        self.bg_pos[1] -= 1
+        self.bg_pos[2] -= 3
 
         bird_y = self.bird_pos[1]
 
@@ -90,9 +89,21 @@ class Game:
         # Täytä tausta vaaleansinisellä
         #self.screen.fill((230, 230, 255))
 
-        self.screen.blit(self.bg_imgs[0], (self.bg0_pos, 0))
-        self.screen.blit(self.bg_imgs[1], (self.bg1_pos, 0))
-        self.screen.blit(self.bg_imgs[2], (self.bg2_pos, 0))
+        # Piirrä taustakerrokset (3 kpl)
+        for i in [0, 1, 2]:
+            # Ensin piirrä vasen tausta
+            self.screen.blit(self.bg_imgs[i], (self.bg_pos[i], 0))
+            # Jos vasen tausta ei riitä peittämään koko ruutua, niin...
+            if self.bg_pos[i] + self.bg_widths[i] < 800:
+                # ...piirrä sama tausta vielä oikealle puolelle
+                self.screen.blit(
+                    self.bg_imgs[i],
+                    (self.bg_pos[i] + self.bg_widths[i], 0)
+                )
+            # Jos taustaa on jo siirretty sen leveyden verran...
+            if self.bg_pos[i] < -self.bg_widths[i]:
+                # ...niin aloita alusta
+                self.bg_pos[i] += self.bg_widths[i]
 
         # Piirrä lintu
         angle = -90 * 0.04 * self.bird_y_speed
