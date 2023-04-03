@@ -24,6 +24,14 @@ class Game:
             pygame.transform.rotozoom(x, 0, 1/16).convert_alpha()
             for x in original_bird_images
         ]
+        original_bird_dead_images = [
+            pygame.image.load(f"images/chicken/got_hit/frame-{i}.png")
+            for i in [1, 2]
+        ]
+        self.bird_dead_imgs = [
+            pygame.transform.rotozoom(x, 0, 1/16).convert_alpha()
+            for x in original_bird_dead_images
+        ]
         original_bg_images = [
             pygame.image.load(f"images/background/layer_{i}.png")
             for i in [1, 2, 3]
@@ -78,10 +86,12 @@ class Game:
         if self.bird_alive and self.bird_lift:
             # Lintua nostetaan (0.5 px nostovauhtia / frame)
             self.bird_y_speed -= 0.5
-            self.bird_frame += 1
         else:
             # Painovoima (lisää putoamisnopeutta joka kuvassa)
             self.bird_y_speed += 0.2
+
+        if self.bird_lift or not self.bird_alive:
+            self.bird_frame += 1
 
         # Liikuta lintua sen nopeuden verran
         bird_y += self.bird_y_speed
@@ -121,7 +131,10 @@ class Game:
                 self.bg_pos[i] += self.bg_widths[i]
 
         # Piirrä lintu
-        bird_img_i = self.bird_imgs[(self.bird_frame // 3) % 4]
+        if self.bird_alive:
+            bird_img_i = self.bird_imgs[(self.bird_frame // 3) % 4]
+        else:
+            bird_img_i = self.bird_dead_imgs[(self.bird_frame // 10) % 2]
         bird_img = pygame.transform.rotozoom(bird_img_i, self.bird_angle, 1)
         self.screen.blit(bird_img, self.bird_pos)
 
