@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 DEFAULT_SCREEN_SIZE = (800, 450)
@@ -62,6 +64,7 @@ class Game:
         self.bird_angle = 0
         self.bird_frame = 0
         self.bird_lift = False
+        self.obstacles = [Obstacle.make_random(self.screen_w, self.screen_h)]
 
     def scale_positions(self, scale_x, scale_y):
         self.bird_pos = (self.bird_pos[0] * scale_x, self.bird_pos[1] * scale_y)
@@ -148,6 +151,9 @@ class Game:
         # Aseta linnun x-y-koordinaatit self.bird_pos-muuttujaan
         self.bird_pos = (self.bird_pos[0], bird_y)
 
+        for obstacle in self.obstacles:
+            obstacle.move(self.screen_w * 0.005)
+
     def update_screen(self):
         # Täytä tausta vaaleansinisellä
         #self.screen.fill((230, 230, 255))
@@ -167,6 +173,9 @@ class Game:
             if self.bg_pos[i] < -self.bg_widths[i]:
                 # ...niin aloita alusta
                 self.bg_pos[i] += self.bg_widths[i]
+
+        for obstacle in self.obstacles:
+            obstacle.render(self.screen)
 
         # Piirrä lintu
         if self.bird_alive:
@@ -189,6 +198,37 @@ class Game:
             self.screen.blit(fps_img, (0, 0))
 
         pygame.display.flip()
+
+
+class Obstacle:
+    def __init__(self, position, upper_height, lower_height, width=100):
+        self.position = position  # vasemman reunan sijainti
+        self.upper_height = upper_height
+        self.lower_height = lower_height
+        self.width = width
+        self.color = (0, 128, 0)  # dark green
+
+    @classmethod
+    def make_random(cls, screen_w, screen_h):
+        h1 = random.randint(int(screen_h * 0.05), int(screen_h * 0.75))
+        h2 = random.randint(int((screen_h - h1) * 0.05),
+                             int((screen_h - h1) * 0.75))
+        return cls(upper_height=h1, lower_height=h2, position=screen_w)
+
+    def move(self, speed):
+        self.position -= speed
+
+    def is_visible(self):
+        return self.position + self.width >= 0
+
+    def render(self, screen):
+        x = self.position
+        uy = 0
+        uh = self.upper_height
+        pygame.draw.rect(screen, self.color, (x, uy, self.width, uh))
+        ly = screen.get_height() - self.lower_height
+        lh = self.lower_height
+        pygame.draw.rect(screen, self.color, (x, ly, self.width, lh))
 
 
 if __name__ == "__main__":
