@@ -35,8 +35,10 @@ class Game:
         self.bg_widths = [x.get_width() for x in self.bg_imgs]
 
     def init_objects(self):
+        self.bird_alive = True
         self.bird_y_speed = 0
-        self.bird_pos = (200, 000)
+        self.bird_pos = (800 / 3, 600 / 2)
+        self.bird_angle = 0
         self.bird_lift = False
         self.bg_pos = [0, 0, 0]
 
@@ -66,13 +68,14 @@ class Game:
                     self.bird_lift = False
 
     def handle_game_logic(self):
-        self.bg_pos[0] -= 0.5
-        self.bg_pos[1] -= 1
-        self.bg_pos[2] -= 3
+        if self.bird_alive:
+            self.bg_pos[0] -= 0.5
+            self.bg_pos[1] -= 1
+            self.bg_pos[2] -= 3
 
         bird_y = self.bird_pos[1]
 
-        if self.bird_lift:
+        if self.bird_alive and self.bird_lift:
             # Lintua nostetaan (0.5 px nostovauhtia / frame)
             self.bird_y_speed -= 0.5
             self.bird_frame += 1
@@ -83,6 +86,18 @@ class Game:
         # Liikuta lintua sen nopeuden verran
         bird_y += self.bird_y_speed
 
+        if self.bird_alive:  # Jos lintu on elossa
+            # Laske linnun asento
+            self.bird_angle = -90 * 0.04 * self.bird_y_speed
+            self.bird_angle = max(min(self.bird_angle, 60), -60)
+
+        # Tarkista onko lintu pudonnut maahan
+        if bird_y > 600 - 135:
+            bird_y = 600 - 135
+            self.bird_y_speed = 0
+            self.bird_alive = False
+
+        # Aseta linnun x-y-koordinaatit self.bird_pos-muuttujaan
         self.bird_pos = (self.bird_pos[0], bird_y)
 
     def update_screen(self):
@@ -106,12 +121,8 @@ class Game:
                 self.bg_pos[i] += self.bg_widths[i]
 
         # Piirrä lintu
-        angle = -90 * 0.04 * self.bird_y_speed
-        angle = max(min(angle, 60), -60)
-
         bird_img_i = self.bird_imgs[(self.bird_frame // 3) % 4]
-
-        bird_img = pygame.transform.rotozoom(bird_img_i, angle, 1)
+        bird_img = pygame.transform.rotozoom(bird_img_i, self.bird_angle, 1)
         self.screen.blit(bird_img, self.bird_pos)
 
         pygame.display.flip()
