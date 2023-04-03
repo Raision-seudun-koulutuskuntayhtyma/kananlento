@@ -6,22 +6,26 @@ def main():
     game.run()
 
 
+DEFAULT_SCREEN_SIZE = (800, 450)
+
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((800, 600))
+        self.is_fullscreen = False
+        self.screen = pygame.display.set_mode(DEFAULT_SCREEN_SIZE)
+        self.screen_w = self.screen.get_width()
+        self.screen_h = self.screen.get_height()
         self.running = False
         self.init_graphics()
         self.init_objects()
 
     def init_graphics(self):
-        self.bird_frame = 0
         original_bird_images = [
             pygame.image.load(f"images/chicken/flying/frame-{i}.png")
             for i in [1, 2, 3, 4]
         ]
         self.bird_imgs = [
-            pygame.transform.rotozoom(x, 0, 1/16).convert_alpha()
+            pygame.transform.rotozoom(x, 0, self.screen_h / 9600).convert_alpha()
             for x in original_bird_images
         ]
         original_bird_dead_images = [
@@ -29,26 +33,35 @@ class Game:
             for i in [1, 2]
         ]
         self.bird_dead_imgs = [
-            pygame.transform.rotozoom(x, 0, 1/16).convert_alpha()
-            for x in original_bird_dead_images
+            pygame.transform.rotozoom(img, 0, self.screen_h / 9600).convert_alpha()
+            for img in original_bird_dead_images
         ]
         original_bg_images = [
             pygame.image.load(f"images/background/layer_{i}.png")
             for i in [1, 2, 3]
         ]
         self.bg_imgs = [
-            pygame.transform.rotozoom(x, 0, 600 / x.get_height()).convert_alpha()
-            for x in original_bg_images
+            pygame.transform.rotozoom(
+                img, 0, self.screen_h / img.get_height()
+            ).convert_alpha()
+            for img in original_bg_images
         ]
-        self.bg_widths = [x.get_width() for x in self.bg_imgs]
+        self.bg_widths = [img.get_width() for img in self.bg_imgs]
 
     def init_objects(self):
         self.bird_alive = True
         self.bird_y_speed = 0
-        self.bird_pos = (800 / 3, 600 / 2)
+        self.bird_pos = (self.screen_w / 3, self.screen_h / 2)
         self.bird_angle = 0
+        self.bird_frame = 0
         self.bird_lift = False
         self.bg_pos = [0, 0, 0]
+
+    def scale_positions(self, scale_x, scale_y):
+        self.bird_pos = (self.bird_pos[0] * scale_x, self.bird_pos[1] * scale_y)
+        self.bg_pos[0] = self.bg_pos[0] * scale_x
+        self.bg_pos[1] = self.bg_pos[1] * scale_x
+        self.bg_pos[2] = self.bg_pos[2] * scale_x
 
     def run(self):
         clock = pygame.time.Clock()
@@ -74,6 +87,25 @@ class Game:
             elif event.type == pygame.KEYUP:
                 if event.key in (pygame.K_SPACE, pygame.K_UP):
                     self.bird_lift = False
+                elif event.key in (pygame.K_f, pygame.K_F11):
+                    self.toggle_fullscreen()
+
+    def toggle_fullscreen(self):
+        self.is_fullscreen = not self.is_fullscreen
+        old_w = self.screen_w
+        old_h = self.screen_h
+        if self.is_fullscreen:
+            pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        else:
+            pygame.display.set_mode(DEFAULT_SCREEN_SIZE )
+        screen = pygame.display.get_surface()
+        self.screen_w = screen.get_width()
+        self.screen_h = screen.get_height()
+        self.init_graphics()
+        self.scale_positions(
+            scale_x=(self.screen_w / old_w),
+            scale_y=(self.screen_h / old_h),
+        )
 
     def handle_game_logic(self):
         if self.bird_alive:
@@ -102,8 +134,8 @@ class Game:
             self.bird_angle = max(min(self.bird_angle, 60), -60)
 
         # Tarkista onko lintu pudonnut maahan
-        if bird_y > 600 - 135:
-            bird_y = 600 - 135
+        if bird_y > self.screen_h * 0.78:
+            bird_y = self.screen_h * 0.78
             self.bird_y_speed = 0
             self.bird_alive = False
 
@@ -119,7 +151,7 @@ class Game:
             # Ensin piirrä vasen tausta
             self.screen.blit(self.bg_imgs[i], (self.bg_pos[i], 0))
             # Jos vasen tausta ei riitä peittämään koko ruutua, niin...
-            if self.bg_pos[i] + self.bg_widths[i] < 800:
+            if self.bg_pos[i] + self.bg_widths[i] < self.screen_w:
                 # ...piirrä sama tausta vielä oikealle puolelle
                 self.screen.blit(
                     self.bg_imgs[i],
