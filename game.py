@@ -59,9 +59,8 @@ class Game:
 
     def scale_positions(self, scale_x, scale_y):
         self.bird_pos = (self.bird_pos[0] * scale_x, self.bird_pos[1] * scale_y)
-        self.bg_pos[0] = self.bg_pos[0] * scale_x
-        self.bg_pos[1] = self.bg_pos[1] * scale_x
-        self.bg_pos[2] = self.bg_pos[2] * scale_x
+        for i in range(len(self.bg_pos)):
+            self.bg_pos[i] = self.bg_pos[i] * scale_x
 
     def run(self):
         clock = pygame.time.Clock()
@@ -150,7 +149,7 @@ class Game:
         #self.screen.fill((230, 230, 255))
 
         # Piirrä taustakerrokset (3 kpl)
-        for i in [0, 1, 2]:
+        for i in range(len(self.bg_imgs)):
             # Ensin piirrä vasen tausta
             self.screen.blit(self.bg_imgs[i], (self.bg_pos[i], 0))
             # Jos vasen tausta ei riitä peittämään koko ruutua, niin...
