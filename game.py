@@ -16,21 +16,21 @@ class Game:
 
     def init_graphics(self):
         self.bird_frame = 0
-        bird_imgs = [
+        original_bird_images = [
             pygame.image.load(f"images/chicken/flying/frame-{i}.png")
             for i in [1, 2, 3, 4]
         ]
         self.bird_imgs = [
-            pygame.transform.rotozoom(x, 0, 1/16)
-            for x in bird_imgs
+            pygame.transform.rotozoom(x, 0, 1/16).convert_alpha()
+            for x in original_bird_images
         ]
-        bg_imgs = [
+        original_bg_images = [
             pygame.image.load(f"images/background/layer_{i}.png")
             for i in [1, 2, 3]
         ]
         self.bg_imgs = [
             pygame.transform.rotozoom(x, 0, 600 / x.get_height()).convert_alpha()
-            for x in bg_imgs
+            for x in original_bg_images
         ]
 
     def init_objects(self):
