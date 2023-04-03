@@ -47,15 +47,15 @@ class Game:
             for img in original_bg_images
         ]
         self.bg_widths = [img.get_width() for img in self.bg_imgs]
+        self.bg_pos = [0, 0, 0]
 
     def init_objects(self):
         self.bird_alive = True
         self.bird_y_speed = 0
-        self.bird_pos = (self.screen_w / 3, self.screen_h / 2)
+        self.bird_pos = (self.screen_w / 3, self.screen_h / 4)
         self.bird_angle = 0
         self.bird_frame = 0
         self.bird_lift = False
-        self.bg_pos = [0, 0, 0]
 
     def scale_positions(self, scale_x, scale_y):
         self.bird_pos = (self.bird_pos[0] * scale_x, self.bird_pos[1] * scale_y)
@@ -89,6 +89,8 @@ class Game:
                     self.bird_lift = False
                 elif event.key in (pygame.K_f, pygame.K_F11):
                     self.toggle_fullscreen()
+                elif event.key in (pygame.K_r, pygame.K_RETURN):
+                    self.init_objects()
 
     def toggle_fullscreen(self):
         old_w = self.screen_w
