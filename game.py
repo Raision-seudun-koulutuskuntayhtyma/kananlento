@@ -64,7 +64,7 @@ class Game:
         self.bird_angle = 0
         self.bird_frame = 0
         self.bird_lift = False
-        self.obstacles = []
+        self.obstacles: list[Obstacle] = []
         self.add_obstacle()
 
     def add_obstacle(self):
