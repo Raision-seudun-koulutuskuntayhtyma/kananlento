@@ -164,7 +164,7 @@ class Game:
             self.add_obstacle()
 
         # Poista vasemmanpuoleisin este, kun se menee pois ruudulta
-        if self.obstacles[0].position < -self.obstacles[0].width:
+        if not self.obstacles[0].is_visible():
             self.remove_oldest_obstacle()
 
         for obstacle in self.obstacles:
