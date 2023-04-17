@@ -4,6 +4,7 @@ import pygame
 
 DEFAULT_SCREEN_SIZE = (800, 450)
 FPS_TEXT_COLOR = (128, 0, 128)  # dark purple
+SCORE_TEXT_COLOR = (0, 64, 160)  
 TEXT_COLOR = (128, 0, 0)  # dark red
 
 DEBUG = 0
@@ -61,6 +62,7 @@ class Game:
         self.bg_pos = [0, 0, 0]
 
     def init_objects(self):
+        self.score = 0
         self.bird_alive = True
         self.bird_y_speed = 0
         self.bird_pos = (self.screen_w / 3, self.screen_h / 4)
@@ -169,6 +171,7 @@ class Game:
         # Poista vasemmanpuoleisin este, kun se menee pois ruudulta
         if not self.obstacles[0].is_visible():
             self.remove_oldest_obstacle()
+            self.score += 1
 
         # Siirrä esteitä sopivalla nopeudella ja tarkista törmäys
         self.bird_collides_with_obstacle = False
@@ -213,6 +216,13 @@ class Game:
         bird_x = self.bird_pos[0] - bird_img.get_width() / 2 * 1.25
         bird_y = self.bird_pos[1] - bird_img.get_height() / 2
         self.screen.blit(bird_img, (bird_x, bird_y))
+
+        # Piirrä pisteet
+        score_text = f"{self.score}"
+        score_img = self.font_big.render(score_text, True, SCORE_TEXT_COLOR)
+        score_pos = (self.screen_w * 0.95 - score_img.get_width(),
+                     self.screen_h - score_img.get_height())
+        self.screen.blit(score_img, score_pos)
 
         # Piirrä GAME OVER -teksti
         if not self.bird_alive:
