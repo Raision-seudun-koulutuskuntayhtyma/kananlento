@@ -6,7 +6,7 @@ DEFAULT_SCREEN_SIZE = (800, 450)
 FPS_TEXT_COLOR = (128, 0, 128)  # dark purple
 TEXT_COLOR = (128, 0, 0)  # dark red
 
-DEBUG = 1
+DEBUG = 0
 
 def main():
     game = Game()
@@ -173,13 +173,13 @@ class Game:
         # Siirrä esteitä sopivalla nopeudella ja tarkista törmäys
         self.bird_collides_with_obstacle = False
         for obstacle in self.obstacles:
-            position = obstacle.move(self.screen_w * 0.005)
+            if self.bird_alive:
+                obstacle.move(self.screen_w * 0.005)
             if obstacle.collides_with_circle(self.bird_pos, self.bird_radius):
                 self.bird_collides_with_obstacle = True
         
         if self.bird_collides_with_obstacle:
-            pass  # Testausta varten kommentoitu:
-            # self.bird_alive = False
+            self.bird_alive = False
 
     def update_screen(self):
         # Täytä tausta vaaleansinisellä
@@ -256,7 +256,6 @@ class Obstacle:
 
     def move(self, speed):
         self.position -= speed
-        return self.position
 
     def is_visible(self):
         return self.position + self.width >= 0
