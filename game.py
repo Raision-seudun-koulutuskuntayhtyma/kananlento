@@ -170,6 +170,8 @@ class Game:
         for obstacle in self.obstacles:
             obstacle.move(self.screen_w * 0.005)
 
+        
+
     def update_screen(self):
         # Täytä tausta vaaleansinisellä
         #self.screen.fill((230, 230, 255))
@@ -226,9 +228,10 @@ class Obstacle:
 
     @classmethod
     def make_random(cls, screen_w, screen_h):
-        h1 = random.randint(int(screen_h * 0.05), int(screen_h * 0.75))
-        h2 = random.randint(int((screen_h - h1) * 0.05),
-                            int((screen_h - h1) * 0.75))
+        hole_size = random.randint(int(screen_h * 0.25),
+                                   int(screen_h * 0.75))
+        h2 = random.randint(int(screen_h * 0.15), int(screen_h * 0.75))
+        h1 = screen_h - h2 - hole_size
         return cls(upper_height=h1, lower_height=h2, position=screen_w)
 
     def move(self, speed):
