@@ -88,9 +88,15 @@ class Game:
         self.running = True
 
         while self.running:
+            # Käsittele tapahtumat (eventit)
             self.handle_events()
+
+            # Pelin logiikka (liikkumiset, painovoima, yms.)
             self.handle_game_logic()
+
+            # Päivitä näyttö
             self.update_screen()
+
             # Odota niin kauan, että ruudun päivitysnopeus on 60fps
             self.clock.tick(60)
 
