@@ -140,12 +140,10 @@ class Game:
                             pass  # TODO: Implement About view
                         elif item == "Quit":
                             self.running = False
-                elif not self.bird_alive:
-                    self.is_in_menu = True
                 elif event.key in (pygame.K_SPACE, pygame.K_UP):
                     self.bird_lift = False
-                elif event.key in (pygame.K_r, pygame.K_RETURN):
-                    self.init_objects()
+                elif event.key == pygame.K_ESCAPE or not self.bird_alive:
+                    self.is_in_menu = True
 
     def toggle_fullscreen(self):
         old_w = self.screen_w
