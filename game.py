@@ -36,6 +36,7 @@ class Game:
         self.init_sounds()
         self.init_graphics()
         self.init_objects()
+        self.open_menu()
 
     def init_sounds(self):
         self.flying_sound = pygame.mixer.Sound("sounds/flying.wav")
@@ -157,11 +158,13 @@ class Game:
                     self.open_menu()
 
     def start_game(self):
+        self.play_game_music()
         self.is_in_menu = False
         self.init_objects()
         self.flying_sound.play(-1)
 
     def open_menu(self):
+        self.play_menu_music()
         self.is_in_menu = True
         self.flying_sound.stop()
 
@@ -170,6 +173,14 @@ class Game:
             self.bird_alive = False
             self.flying_sound.stop()
             self.hit_sound.play()
+
+    def play_menu_music(self):
+        pygame.mixer.music.load("music/menu_chill.ogg")
+        pygame.mixer.music.play(-1)
+
+    def play_game_music(self):
+        pygame.mixer.music.load("music/run_game_2.ogg")
+        pygame.mixer.music.play(-1)
 
     def toggle_fullscreen(self):
         old_w = self.screen_w
