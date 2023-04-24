@@ -1,5 +1,6 @@
 import pygame
 
+from menu import Menu
 from obstacle import Obstacle
 
 DEFAULT_SCREEN_SIZE = (800, 450)
@@ -18,7 +19,14 @@ class Game:
     def __init__(self):
         pygame.init()
         self.clock = pygame.time.Clock()
+        self.menu = Menu([
+            "New Game",
+            "High Scores",
+            "About",
+            "Quit",
+        ])
         self.is_fullscreen = False
+        self.is_in_menu = True
         self.show_fps = True
         self.screen = pygame.display.set_mode(DEFAULT_SCREEN_SIZE)
         self.screen_w = self.screen.get_width()
@@ -139,6 +147,9 @@ class Game:
         )
 
     def handle_game_logic(self):
+        if self.is_in_menu:
+            return
+
         if self.bird_alive:
             self.bg_pos[0] -= 0.5
             self.bg_pos[1] -= 1
@@ -212,6 +223,10 @@ class Game:
             if self.bg_pos[i] < -self.bg_widths[i]:
                 # ...niin aloita alusta
                 self.bg_pos[i] += self.bg_widths[i]
+
+        if self.is_in_menu:
+            self.menu.render(self.screen)
+            return
 
         for obstacle in self.obstacles:
             obstacle.render(self.screen)
