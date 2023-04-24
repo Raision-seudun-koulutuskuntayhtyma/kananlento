@@ -1,7 +1,7 @@
 import pygame
 
 DEFAULT_COLOR = (0, 0, 128)
-DEFAULT_SELECT_COLOR = (60, 60, 255)
+DEFAULT_SELECT_COLOR = (90, 90, 255)
 DEFAULT_FONT_FILE = "fonts/SyneMono-Regular.ttf"
 DEFAULT_FONT_SIZE = 48
 
@@ -16,16 +16,34 @@ class Menu:
         font_size=DEFAULT_FONT_SIZE,
     ):
         self.items = items
+        self.selected_idx = 0
         self.color = color
         self.select_color = select_color
         self.font = pygame.font.Font(font_file, font_size)
+
+    def select_next_item(self):
+        self.selected_idx += 1
+        if self.selected_idx >= len(self.items):
+            self.selected_idx = 0
+
+    def select_previous_item(self):
+        self.selected_idx -= 1
+        if self.selected_idx < 0:
+            self.selected_idx = len(self.items) - 1
+
+    def get_selected_item(self):
+        return self.items[self.selected_idx]
 
     def render(self, screen):
         screen_w = screen.get_width()
         screen_h = screen.get_height()
         text_imgs = [
-            self.font.render(text, True, self.color)
-            for text in self.items
+            self.font.render(
+                text,
+                True,
+                self.select_color if i == self.selected_idx else self.color,
+            )
+            for (i, text) in enumerate(self.items)
         ]
         padding = int(screen_h * 0.05)
         total_text_height = sum(img.get_height() for img in text_imgs)

@@ -119,12 +119,31 @@ class Game:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key in (pygame.K_SPACE, pygame.K_UP):
-                    self.bird_lift = True
+                    if not self.is_in_menu:
+                        self.bird_lift = True
             elif event.type == pygame.KEYUP:
-                if event.key in (pygame.K_SPACE, pygame.K_UP):
-                    self.bird_lift = False
-                elif event.key in (pygame.K_f, pygame.K_F11):
+                if event.key in (pygame.K_f, pygame.K_F11):
                     self.toggle_fullscreen()
+                elif self.is_in_menu:
+                    if event.key == pygame.K_UP:
+                        self.menu.select_previous_item()
+                    elif event.key == pygame.K_DOWN:
+                        self.menu.select_next_item()
+                    elif event.key == pygame.K_RETURN:
+                        item = self.menu.get_selected_item()
+                        if item == "New Game":
+                            self.is_in_menu = False
+                            self.init_objects()
+                        elif item == "High Scores":
+                            pass  # TODO: Implement High Score view
+                        elif item == "About":
+                            pass  # TODO: Implement About view
+                        elif item == "Quit":
+                            self.running = False
+                elif not self.bird_alive:
+                    self.is_in_menu = True
+                elif event.key in (pygame.K_SPACE, pygame.K_UP):
+                    self.bird_lift = False
                 elif event.key in (pygame.K_r, pygame.K_RETURN):
                     self.init_objects()
 
