@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from highscore import HighscoreRecorder
 from menu import Menu
 from obstacle import Obstacle
 
@@ -27,8 +28,10 @@ class Game:
             "About",
             "Quit",
         ])
+        self.highscore_recorder = HighscoreRecorder()
         self.is_fullscreen = False
         self.is_in_menu = True
+        self.is_in_highscore_record = False
         self.show_fps = True
         self.screen = pygame.display.set_mode(DEFAULT_SCREEN_SIZE)
         self.screen_w = self.screen.get_width()
@@ -46,6 +49,7 @@ class Game:
 
     def init_graphics(self):
         self.menu.set_font_size(int(48 * self.screen_h / 450))
+        self.highscore_recorder.set_font_size(int(36 * self.screen_h / 450))
         big_font_size = int(96 * self.screen_h / 450)
         self.font_big = pygame.font.Font("fonts/SyneMono-Regular.ttf", big_font_size)
         original_bird_images = [
@@ -158,11 +162,15 @@ class Game:
                 elif event.key in (pygame.K_SPACE, pygame.K_UP):
                     self.bird_lift = False
                 elif event.key == pygame.K_ESCAPE or not self.bird_alive:
-                    self.open_menu()
+                    if not self.is_in_highscore_record:
+                        self.record_highscores()
+                    else:
+                        self.open_menu()
 
     def start_game(self):
         self.play_game_music()
         self.is_in_menu = False
+        self.is_in_highscore_record = False
         self.init_objects()
         self.flying_sound.play(-1)
 
@@ -177,6 +185,10 @@ class Game:
             self.flying_sound.stop()
             self.hit_sound.play()
             pygame.mixer.music.fadeout(500)
+
+    def record_highscores(self):
+        self.is_in_highscore_record = True
+        print("High score")
 
     def play_menu_music(self):
         pygame.mixer.music.load("music/menu_chill.ogg")
@@ -293,6 +305,10 @@ class Game:
 
         if self.is_in_menu:
             self.menu.render(self.screen)
+            return
+
+        if self.is_in_highscore_record:
+            self.highscore_recorder.render(self.screen)
             return
 
         for obstacle in self.obstacles:
