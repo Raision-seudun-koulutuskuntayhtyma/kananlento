@@ -88,10 +88,16 @@ class Game:
     def remove_oldest_obstacle(self):
         self.obstacles.pop(0)
 
-    def scale_positions(self, scale_x, scale_y):
+    def scale_positions_and_sizes(self, scale_x, scale_y):
         self.bird_pos = (self.bird_pos[0] * scale_x, self.bird_pos[1] * scale_y)
         for i in range(len(self.bg_pos)):
             self.bg_pos[i] = self.bg_pos[i] * scale_x
+        for obstacle in self.obstacles:
+            obstacle.width *= scale_x
+            obstacle.position *= scale_x
+            obstacle.upper_height *= scale_y
+            obstacle.hole_size *= scale_y
+            obstacle.lower_height *= scale_y
 
     def run(self):
         self.running = True
@@ -159,7 +165,7 @@ class Game:
         self.screen_w = screen.get_width()
         self.screen_h = screen.get_height()
         self.init_graphics()
-        self.scale_positions(
+        self.scale_positions_and_sizes(
             scale_x=(self.screen_w / old_w),
             scale_y=(self.screen_h / old_h),
         )
