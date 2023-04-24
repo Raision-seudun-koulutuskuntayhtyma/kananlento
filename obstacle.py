@@ -46,10 +46,33 @@ class Obstacle:
         return False
 
     def render(self, screen):
+        shadow_offset = screen.get_width() * 0.004
         x = self.position
         uy = 0
         uh = self.upper_height
+
+        pygame.draw.rect(screen, (30, 30, 30),
+                        (x + shadow_offset, uy, self.width, uh + shadow_offset))
         pygame.draw.rect(screen, self.color, (x, uy, self.width, uh))
+        pygame.draw.rect(screen, (0, 160, 0),
+                         (x + shadow_offset, uy,
+                          self.width - shadow_offset * 2,
+                          uh - shadow_offset))
+        pygame.draw.rect(screen, (0, 190, 0),
+                         (x + shadow_offset * 2, uy,
+                          self.width - shadow_offset * 4,
+                          uh - shadow_offset * 2))
+
         ly = screen.get_height() - self.lower_height
         lh = self.lower_height
+        pygame.draw.rect(screen, (30, 30, 30),
+                        (x + shadow_offset, ly + shadow_offset, self.width, lh))
         pygame.draw.rect(screen, self.color, (x, ly, self.width, lh))
+        pygame.draw.rect(screen, (0, 160, 0),
+                         (x + shadow_offset, ly + shadow_offset,
+                          self.width - shadow_offset * 2,
+                          lh - shadow_offset))
+        pygame.draw.rect(screen, (0, 190, 0),
+                         (x + shadow_offset * 2, ly + shadow_offset * 2,
+                          self.width - shadow_offset * 4,
+                          lh - shadow_offset * 2))
