@@ -37,6 +37,7 @@ class Game:
         self.init_objects()
 
     def init_graphics(self):
+        self.menu.set_font_size(int(48 * self.screen_h / 450))
         big_font_size = int(96 * self.screen_h / 450)
         self.font_big = pygame.font.Font("fonts/SyneMono-Regular.ttf", big_font_size)
         original_bird_images = [

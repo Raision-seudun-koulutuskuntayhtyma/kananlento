@@ -19,7 +19,11 @@ class Menu:
         self.selected_idx = 0
         self.color = color
         self.select_color = select_color
-        self.font = pygame.font.Font(font_file, font_size)
+        self.font_file = font_file
+        self.set_font_size(font_size)
+
+    def set_font_size(self, size):
+        self.font = pygame.font.Font(self.font_file, size)
 
     def select_next_item(self):
         self.selected_idx += 1
