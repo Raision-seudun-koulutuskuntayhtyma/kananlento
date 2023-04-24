@@ -33,8 +33,13 @@ class Game:
         self.screen_h = self.screen.get_height()
         self.running = False
         self.font16 = pygame.font.Font("fonts/SyneMono-Regular.ttf", 16)
+        self.init_sounds()
         self.init_graphics()
         self.init_objects()
+
+    def init_sounds(self):
+        self.flying_sound = pygame.mixer.Sound("sounds/flying.wav")
+        self.hit_sound = pygame.mixer.Sound("sounds/hit.wav")
 
     def init_graphics(self):
         self.menu.set_font_size(int(48 * self.screen_h / 450))
@@ -139,8 +144,7 @@ class Game:
                     elif event.key == pygame.K_RETURN:
                         item = self.menu.get_selected_item()
                         if item == "New Game":
-                            self.is_in_menu = False
-                            self.init_objects()
+                            self.start_game()
                         elif item == "High Scores":
                             pass  # TODO: Implement High Score view
                         elif item == "About":
@@ -150,7 +154,22 @@ class Game:
                 elif event.key in (pygame.K_SPACE, pygame.K_UP):
                     self.bird_lift = False
                 elif event.key == pygame.K_ESCAPE or not self.bird_alive:
-                    self.is_in_menu = True
+                    self.open_menu()
+
+    def start_game(self):
+        self.is_in_menu = False
+        self.init_objects()
+        self.flying_sound.play(-1)
+
+    def open_menu(self):
+        self.is_in_menu = True
+        self.flying_sound.stop()
+
+    def kill_bird(self):
+        if self.bird_alive:
+            self.bird_alive = False
+            self.flying_sound.stop()
+            self.hit_sound.play()
 
     def toggle_fullscreen(self):
         old_w = self.screen_w
@@ -203,7 +222,7 @@ class Game:
         if bird_y > self.screen_h * 0.82:
             bird_y = self.screen_h * 0.82
             self.bird_y_speed = 0
-            self.bird_alive = False
+            self.kill_bird()
 
         # Aseta linnun x-y-koordinaatit self.bird_pos-muuttujaan
         self.bird_pos = (self.bird_pos[0], bird_y)
@@ -226,7 +245,7 @@ class Game:
                 self.bird_collides_with_obstacle = True
         
         if self.bird_collides_with_obstacle:
-            self.bird_alive = False
+            self.kill_bird()
 
     def update_screen(self):
         # Täytä tausta vaaleansinisellä
