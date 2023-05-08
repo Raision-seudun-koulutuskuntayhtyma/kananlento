@@ -3,7 +3,8 @@ import random
 
 import pygame
 
-from highscore import HighscoreAction, HighscoreRecorder
+from highscore import (
+    HighscoreAction, HighscoresDisplay, HighscoreRecorder)
 from menu import Menu, MenuAction
 from obstacle import Obstacle
 
@@ -21,8 +22,9 @@ def main():
 
 class ActiveComponent(enum.Enum):
     MENU = enum.auto()
-    HIGHSCORES = enum.auto()
     GAME = enum.auto()
+    SHOW_HIGHSCORES = enum.auto()
+    RECORD_HIGHSCORE = enum.auto()
 
 
 class Game:
@@ -31,6 +33,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.menu = Menu()
         self.highscore_recorder = HighscoreRecorder()
+        self.highscore_display = HighscoresDisplay()
         self.is_fullscreen = False
         self.active_component: ActiveComponent = ActiveComponent.MENU
         self.show_fps = True
@@ -147,7 +150,11 @@ class Game:
                 action = self.menu.handle_event(event)
                 if action:
                     self.handle_menu_action(action)
-            elif self.active_component == ActiveComponent.HIGHSCORES:
+            elif self.active_component == ActiveComponent.SHOW_HIGHSCORES:
+                action = self.highscore_display.handle_event(event)
+                if action:
+                    self.handle_highscore_action(action)
+            elif self.active_component == ActiveComponent.RECORD_HIGHSCORE:
                 action = self.highscore_recorder.handle_event(event)
                 if action:
                     self.handle_highscore_action(action)
@@ -169,7 +176,8 @@ class Game:
         if action == MenuAction.NEW_GAME:
             self.start_game()
         elif action == MenuAction.HIGHSCORES:
-            pass  # TODO: Implement High Score view
+            self.active_component = ActiveComponent.SHOW_HIGHSCORES
+            self.highscore_display.reload_file()
         elif action == MenuAction.ABOUT:
             pass  # TODO: Implement About
         elif action == MenuAction.QUIT:
@@ -198,7 +206,7 @@ class Game:
             pygame.mixer.music.fadeout(500)
 
     def record_highscore(self):
-        self.active_component = ActiveComponent.HIGHSCORES
+        self.active_component = ActiveComponent.RECORD_HIGHSCORE
         self.highscore_recorder.record_highscore(self.score)
 
     def play_menu_music(self):
@@ -314,8 +322,10 @@ class Game:
         if self.active_component == ActiveComponent.MENU:
             self.menu.render(self.screen)
             return
-
-        if self.active_component == ActiveComponent.HIGHSCORES:
+        elif self.active_component == ActiveComponent.SHOW_HIGHSCORES:
+            self.highscore_display.render(self.screen)
+            return
+        elif self.active_component == ActiveComponent.RECORD_HIGHSCORE:
             self.highscore_recorder.render(self.screen)
             return
 
