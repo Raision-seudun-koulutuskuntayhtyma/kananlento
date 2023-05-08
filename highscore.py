@@ -95,12 +95,10 @@ class HighscoresDisplay:
         entries = self.file.get_top_10()
 
         def format_date(date):
-            if not date:
-                return ""
-            return f"{date:%d.%m. %H:%M}"
+            return f"{date:%d.%m. %H:%M}" if date else ""
 
         lines = [
-            f"{n:2}. {name:20} {score:4}   {format_date(date)}"
+            f"{n:2}. {name:20} {score:4}   {format_date(date):12}"
             for (n, (score, name, date)) in enumerate(entries, 1)
         ]
         texts_and_colors = [
@@ -144,5 +142,26 @@ class HighscoreFile:
     def add_entry(self, name, score):
         date = datetime.datetime.now()
         self.entries.append((score, name, date))
-        self.entries.sort(reverse=True)
+        self.sort_scores()
 
+    def sort_scores(self):
+        """
+        Järjestä nousevaan järjestykseen siten, että pisteet käännetään
+        negatiiviseksi, jolloin suurimmat pisteet tulevat ensin.
+
+        Järjestettävät asiat ovat siis seuraavanlaisia:
+
+            -99  2023-05-08T13:35:00  Nimi1
+            -88  2023-05-06T10:00:00  Nimi2
+            -77  2023-05-07T20:00:00  Nimi3
+            -77  2023-05-08T10:00:00  Nimi4
+
+        Huomaa, että pisteet ovat ensisijainen järjestystekijä ja
+        aikaileima on toinen järjestystekijä, jolloin samalla
+        pistemäärällä olevat rivit järjestyvät aikaleiman mukaan
+        """
+        def sort_key(item):
+            (score, name, date) = item
+            return (-score, date, name)
+
+        self.entries.sort(key=sort_key)
