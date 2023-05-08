@@ -1,8 +1,9 @@
+import enum
 import random
 
 import pygame
 
-from highscore import HighscoreRecorder
+from highscore import HighscoreAction, HighscoreRecorder
 from menu import Menu, MenuAction
 from obstacle import Obstacle
 
@@ -18,20 +19,20 @@ def main():
     game.run()
 
 
+class ActiveComponent(enum.Enum):
+    MENU = enum.auto()
+    HIGHSCORES = enum.auto()
+    GAME = enum.auto()
+
+
 class Game:
     def __init__(self):
         pygame.init()
         self.clock = pygame.time.Clock()
-        self.menu = Menu([
-            "New Game",
-            "High Scores",
-            "About",
-            "Quit",
-        ])
+        self.menu = Menu()
         self.highscore_recorder = HighscoreRecorder()
         self.is_fullscreen = False
-        self.is_in_menu = True
-        self.is_in_highscore_record = False
+        self.active_component: ActiveComponent = ActiveComponent.MENU
         self.show_fps = True
         self.screen = pygame.display.set_mode(DEFAULT_SCREEN_SIZE)
         self.screen_w = self.screen.get_width()
@@ -119,8 +120,9 @@ class Game:
             # Käsittele tapahtumat (eventit)
             self.handle_events()
 
-            # Pelin logiikka (liikkumiset, painovoima, yms.)
-            self.handle_game_logic()
+            if self.active_component == ActiveComponent.GAME:
+                # Pelin logiikka (liikkumiset, painovoima, yms.)
+                self.handle_game_logic()
 
             # Päivitä näyttö
             self.update_screen()
@@ -135,29 +137,30 @@ class Game:
 
     def handle_events(self):
         for event in pygame.event.get():
-            if event.type == pygame.KEYUP and event.key == pygame.K_F11:
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYUP and event.key == pygame.K_F11:
                 self.toggle_fullscreen()
-            elif self.is_in_menu:
+            elif self.active_component == ActiveComponent.GAME:
+                self.handle_event(event)
+            elif self.active_component == ActiveComponent.MENU:
                 action = self.menu.handle_event(event)
                 if action:
                     self.handle_menu_action(action)
-            else:
-                self.handle_event(event)
+            elif self.active_component == ActiveComponent.HIGHSCORES:
+                action = self.highscore_recorder.handle_event(event)
+                if action:
+                    self.handle_highscore_action(action)
 
     def handle_event(self, event):
-        if event.type == pygame.QUIT:
-            self.running = False
-        elif event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:
             if event.key in (pygame.K_SPACE, pygame.K_UP):
-                if not self.is_in_menu:
-                    self.bird_lift = True
+                self.bird_lift = True
         elif event.type == pygame.KEYUP:
-            if event.key in (pygame.K_f, pygame.K_F11):
-                self.toggle_fullscreen()
-            elif event.key in (pygame.K_SPACE, pygame.K_UP):
+            if event.key in (pygame.K_SPACE, pygame.K_UP):
                 self.bird_lift = False
             elif event.key == pygame.K_ESCAPE or not self.bird_alive:
-                if not self.is_in_highscore_record:
+                if self.active_component == ActiveComponent.GAME:
                     self.record_highscores()
                 else:
                     self.open_menu()
@@ -172,16 +175,19 @@ class Game:
         elif action == MenuAction.QUIT:
             self.running = False
 
+    def handle_highscore_action(self, action):
+        if action == HighscoreAction.CLOSE:
+            self.active_component = ActiveComponent.MENU
+
     def start_game(self):
+        self.active_component = ActiveComponent.GAME
         self.play_game_music()
-        self.is_in_menu = False
-        self.is_in_highscore_record = False
         self.init_objects()
         self.flying_sound.play(-1)
 
     def open_menu(self):
+        self.active_component = ActiveComponent.MENU
         self.play_menu_music()
-        self.is_in_menu = True
         self.flying_sound.stop()
 
     def kill_bird(self):
@@ -192,7 +198,7 @@ class Game:
             pygame.mixer.music.fadeout(500)
 
     def record_highscores(self):
-        self.is_in_highscore_record = True
+        self.active_component = ActiveComponent.HIGHSCORES
         print("High score")
 
     def play_menu_music(self):
@@ -224,9 +230,6 @@ class Game:
         )
 
     def handle_game_logic(self):
-        if self.is_in_menu:
-            return
-
         if self.bird_alive:
             self.bg_pos[0] -= 0.5
             self.bg_pos[1] -= 1
@@ -291,9 +294,9 @@ class Game:
 
         # Piirrä taustakerrokset (3 kpl)
         for i in range(len(self.bg_imgs)):  # i käy läpi luvut 0, 1 ja 2
-            # Menussa piirretään vain ensimmäinen taustakerros
-            if self.is_in_menu and i == 1:
-                break  # Kun ollaan menussa ja i=1, niin lopetetaan looppi
+            # Vain pelitilasa piirretään taustakerrokset 1 ja 2
+            if self.active_component != ActiveComponent.GAME and i == 1:
+                break  # Jos ei olla pelissä ja i=1, niin lopetetaan looppi
             # Ensin piirrä vasen tausta
             self.screen.blit(self.bg_imgs[i], (self.bg_pos[i], 0))
             # Jos vasen tausta ei riitä peittämään koko ruutua, niin...
@@ -308,11 +311,11 @@ class Game:
                 # ...niin aloita alusta
                 self.bg_pos[i] += self.bg_widths[i]
 
-        if self.is_in_menu:
+        if self.active_component == ActiveComponent.MENU:
             self.menu.render(self.screen)
             return
 
-        if self.is_in_highscore_record:
+        if self.active_component == ActiveComponent.HIGHSCORES:
             self.highscore_recorder.render(self.screen)
             return
 

@@ -20,13 +20,17 @@ class MenuAction(enum.Enum):
 class Menu:
     def __init__(
         self,
-        items,
         color=DEFAULT_COLOR,
         select_color=DEFAULT_SELECT_COLOR,
         font_file=DEFAULT_FONT_FILE,
         font_size=DEFAULT_FONT_SIZE,
     ):
-        self.items = items
+        self.items = [
+            "New Game",
+            "High Scores",
+            "About",
+            "Quit",
+        ]
         self.selected_idx = 0
         self.color = color
         self.select_color = select_color
@@ -49,7 +53,7 @@ class Menu:
     def get_selected_item(self):
         return self.items[self.selected_idx]
 
-    def handle_event(self, event) -> MenuAction | None:
+    def handle_event(self, event) -> "MenuAction | None":
         if event.type != pygame.KEYUP:
             return None
 
