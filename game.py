@@ -161,7 +161,7 @@ class Game:
                 self.bird_lift = False
             elif event.key == pygame.K_ESCAPE or not self.bird_alive:
                 if self.active_component == ActiveComponent.GAME:
-                    self.record_highscores()
+                    self.record_highscore()
                 else:
                     self.open_menu()
 
@@ -197,9 +197,9 @@ class Game:
             self.hit_sound.play()
             pygame.mixer.music.fadeout(500)
 
-    def record_highscores(self):
+    def record_highscore(self):
         self.active_component = ActiveComponent.HIGHSCORES
-        print("High score")
+        self.highscore_recorder.record_highscore(self.score)
 
     def play_menu_music(self):
         pygame.mixer.music.load("music/menu_chill.ogg")
