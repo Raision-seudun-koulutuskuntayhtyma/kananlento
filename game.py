@@ -297,7 +297,8 @@ class Game:
             self.kill_bird()
 
     def update_screen(self):
-        self.update_screen_background()
+        bg_layers = 3 if self.active_component == ActiveComponent.GAME else 1
+        self.update_screen_background(layer_count=bg_layers)
 
         if self.active_component == ActiveComponent.GAME:
             self.update_screen_game()
@@ -308,12 +309,11 @@ class Game:
         elif self.active_component == ActiveComponent.RECORD_HIGHSCORE:
             self.highscore_recorder.render(self.screen)
 
-    def update_screen_background(self):
-        # Piirrä taustakerrokset (3 kpl)
-        for i in range(len(self.bg_imgs)):  # i käy läpi luvut 0, 1 ja 2
-            # Vain pelitilasa piirretään taustakerrokset 1 ja 2
-            if self.active_component != ActiveComponent.GAME and i == 1:
-                break  # Jos ei olla pelissä ja i=1, niin lopetetaan looppi
+    def update_screen_background(self, layer_count):
+        layers = self.bg_imgs[:layer_count]
+
+        # Piirrä taustakerrokset (layer_count kappaletta)
+        for i in range(len(layers)):  # i käy läpi luvut 0, 1, ..., layer_count
             # Ensin piirrä vasen tausta
             self.screen.blit(self.bg_imgs[i], (self.bg_pos[i], 0))
             # Jos vasen tausta ei riitä peittämään koko ruutua, niin...
