@@ -297,9 +297,18 @@ class Game:
             self.kill_bird()
 
     def update_screen(self):
-        # Täytä tausta vaaleansinisellä
-        #self.screen.fill((230, 230, 255))
+        self.update_screen_background()
 
+        if self.active_component == ActiveComponent.GAME:
+            self.update_screen_game()
+        elif self.active_component == ActiveComponent.MENU:
+            self.menu.render(self.screen)
+        elif self.active_component == ActiveComponent.SHOW_HIGHSCORES:
+            self.highscore_display.render(self.screen)
+        elif self.active_component == ActiveComponent.RECORD_HIGHSCORE:
+            self.highscore_recorder.render(self.screen)
+
+    def update_screen_background(self):
         # Piirrä taustakerrokset (3 kpl)
         for i in range(len(self.bg_imgs)):  # i käy läpi luvut 0, 1 ja 2
             # Vain pelitilasa piirretään taustakerrokset 1 ja 2
@@ -319,16 +328,7 @@ class Game:
                 # ...niin aloita alusta
                 self.bg_pos[i] += self.bg_widths[i]
 
-        if self.active_component == ActiveComponent.MENU:
-            self.menu.render(self.screen)
-            return
-        elif self.active_component == ActiveComponent.SHOW_HIGHSCORES:
-            self.highscore_display.render(self.screen)
-            return
-        elif self.active_component == ActiveComponent.RECORD_HIGHSCORE:
-            self.highscore_recorder.render(self.screen)
-            return
-
+    def update_screen_game(self):
         for obstacle in self.obstacles:
             obstacle.render(self.screen)
 
