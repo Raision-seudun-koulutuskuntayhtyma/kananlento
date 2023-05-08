@@ -88,6 +88,7 @@ class Game:
 
     def init_objects(self):
         self.score = 0
+        self.speedfactor = 1
         self.bird_alive = True
         self.bird_y_speed = 0
         self.bird_pos = (self.screen_w / 3, self.screen_h / 4)
@@ -239,9 +240,9 @@ class Game:
 
     def handle_game_logic(self):
         if self.bird_alive:
-            self.bg_pos[0] -= 0.5
-            self.bg_pos[1] -= 1
-            self.bg_pos[2] -= 3
+            self.bg_pos[0] -= 0.5 * self.speedfactor
+            self.bg_pos[1] -= 1 * self.speedfactor
+            self.bg_pos[2] -= 3 * self.speedfactor
 
         bird_y = self.bird_pos[1]
 
@@ -284,12 +285,15 @@ class Game:
         if not self.obstacles[0].is_visible():
             self.remove_oldest_obstacle()
             self.score += 1
+            # Jos score on viidellä jaollinen, niin nopeuta peliä
+            if self.score % 5 == 0:
+                self.speedfactor *= 1.05  #  5% lisää nopeutta
 
         # Siirrä esteitä sopivalla nopeudella ja tarkista törmäys
         self.bird_collides_with_obstacle = False
         for obstacle in self.obstacles:
             if self.bird_alive:
-                obstacle.move(self.screen_w * 0.005)
+                obstacle.move(self.screen_w * 0.005 * self.speedfactor)
             if obstacle.collides_with_circle(self.bird_pos, self.bird_radius):
                 self.bird_collides_with_obstacle = True
         
