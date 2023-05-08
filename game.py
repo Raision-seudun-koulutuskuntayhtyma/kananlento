@@ -3,7 +3,7 @@ import random
 import pygame
 
 from highscore import HighscoreRecorder
-from menu import Menu
+from menu import Menu, MenuAction
 from obstacle import Obstacle
 
 DEFAULT_SCREEN_SIZE = (800, 450)
@@ -135,7 +135,14 @@ class Game:
 
     def handle_events(self):
         for event in pygame.event.get():
-            self.handle_event(event)
+            if event.type == pygame.KEYUP and event.key == pygame.K_F11:
+                self.toggle_fullscreen()
+            elif self.is_in_menu:
+                action = self.menu.handle_event(event)
+                if action:
+                    self.handle_menu_action(action)
+            else:
+                self.handle_event(event)
 
     def handle_event(self, event):
         if event.type == pygame.QUIT:
@@ -147,21 +154,6 @@ class Game:
         elif event.type == pygame.KEYUP:
             if event.key in (pygame.K_f, pygame.K_F11):
                 self.toggle_fullscreen()
-            elif self.is_in_menu:
-                if event.key == pygame.K_UP:
-                    self.menu.select_previous_item()
-                elif event.key == pygame.K_DOWN:
-                    self.menu.select_next_item()
-                elif event.key == pygame.K_RETURN:
-                    item = self.menu.get_selected_item()
-                    if item == "New Game":
-                        self.start_game()
-                    elif item == "High Scores":
-                        pass  # TODO: Implement High Score view
-                    elif item == "About":
-                        pass  # TODO: Implement About view
-                    elif item == "Quit":
-                        self.running = False
             elif event.key in (pygame.K_SPACE, pygame.K_UP):
                 self.bird_lift = False
             elif event.key == pygame.K_ESCAPE or not self.bird_alive:
@@ -169,6 +161,16 @@ class Game:
                     self.record_highscores()
                 else:
                     self.open_menu()
+
+    def handle_menu_action(self, action: MenuAction):
+        if action == MenuAction.NEW_GAME:
+            self.start_game()
+        elif action == MenuAction.HIGHSCORES:
+            pass  # TODO: Implement High Score view
+        elif action == MenuAction.ABOUT:
+            pass  # TODO: Implement About
+        elif action == MenuAction.QUIT:
+            self.running = False
 
     def start_game(self):
         self.play_game_music()
